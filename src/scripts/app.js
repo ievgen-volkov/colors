@@ -10,6 +10,11 @@ document.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('click', (event) => {
+  event.preventDefault();
+  setRandomColors();
+});
+
+document.addEventListener('click', (event) => {
   const type = event.target.dataset.type;
 
   if (type === 'lock') {
