@@ -2,9 +2,10 @@ const cols = document.querySelectorAll('.col');
 
 setRandomColors(true);
 
-document.addEventListener('keydown', (event) => {
-  event.preventDefault();
-  if (event.code === 'Space') {
+document.addEventListener('click', (event) => {
+  const wave = event.target.dataset.type;
+
+  if (wave === 'wave') {
     setRandomColors();
   }
 });
@@ -14,8 +15,8 @@ document.addEventListener('click', (event) => {
 
   if (type === 'lock') {
     const node = event.target.tagName.toLocaleLowerCase() === 'i'
-      ? event.target
-      : event.target.children[0];
+    ? event.target
+    : event.target.children[0];
 
     node.classList.toggle('fa-lock-open');
     node.classList.toggle('fa-lock');
@@ -25,71 +26,58 @@ document.addEventListener('click', (event) => {
 });
 
 function setRandomColors(isInitial) {
-  const color = chroma.random();
   const colors = isInitial ? getColorsFromHash() : [];
 
   cols.forEach((col, index) => {
-    const text = col.querySelector('.text')
+    const text = col.querySelector('.text');
     const button = col.querySelector('.button');
-    const isLocked = col.querySelector('i')
-        .classList.contains('fa-lock');
-
-    const randomColor = isInitial
-        ? colors[index]
-          ? colors[index]
-          : generateRandomColor()
-        : generateRandomColor();
+    const isLocked = col.querySelector('i').classList.contains('fa-lock');
 
     if (isLocked) {
-      colors.push(text.textContent)
+      colors.push(text.textContent);
       return;
     }
 
+    const randomColors = isInitial
+      ? colors[index]
+        ? colors[index]
+        : chroma.random()
+      : chroma.random();
+
     if (!isInitial) {
-      colors.push(randomColor);
+      colors.push(randomColors);
     }
 
-    text.textContent = randomColor;
-    col.style.backgroundColor = randomColor;
+    col.style.backgroundColor = randomColors;
+    text.textContent = randomColors;
 
-    setTextColor(text, color);
-    setTextColor(button, color);
-  })
+    setTextColor(text, randomColors);
+    setTextColor(button, randomColors)
+  });
 
-  getColorsHash(colors);
-}
-
-function copyToClipBoard(text) {
-  return navigator.clipboard.writeText(text);
-}
-
-function generateRandomColor() {
-  let color = '';
-  const hexCode = '0123456789ABCDEF';
-
-  for (let i = 0; i < 6; i++) {
-    color += hexCode[Math.floor(Math.random() * hexCode.length)];
-  }
-
-  return `#${color}`;
+  addColorsHash(colors);
 }
 
 function setTextColor(text, color) {
   const luminance = chroma(color).luminance();
-  text.style.color = luminance > 0.5 ? 'black' : 'white';
+  text.style.color = luminance > 0.5 ? '#000' : '#fff';
 }
 
-function getColorsHash(colors = []) {
-  document.location.hash = colors.map(col => col.toString().substring(1)).join('-');
+function addColorsHash(colors = []) {
+  document.location.hash = colors
+      .map(color => color.toString().substring(1))
+      .join('-');
 }
 
 function getColorsFromHash() {
   if (document.location.hash.length > 1) {
-    return document.location.hash
-        .substring(1)
-        .split('-')
+    return document.location.hash.substring(1).split('-')
         .map(col => `#${col}`);
   }
 
   return [];
+}
+
+function copyToClipBoard(text) {
+  return navigator.clipboard.writeText(text);
 }
